@@ -1,7 +1,13 @@
 import Main from "./pages/Main";
+import { Provider } from "./contexts";
+
 
 function App() {
-  return <Main />;
+  return (
+    <Provider>
+      <Main />
+    </Provider>
+  );
 }
 
 export default App;
