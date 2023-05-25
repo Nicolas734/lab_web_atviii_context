@@ -2,25 +2,26 @@ import styled from "styled-components";
 import { useState } from "react";
 import { Input, City, Forecast } from "../components";
 import { CityProps, WeatherForecastProps } from "../types";
+import { useContexto } from "../hooks";
+import { listCities, weatherForest } from "../services/Weather";
+
 
 export default function Main() {
   const [input, setInput] = useState("São José dos Campos");
-  const city: CityProps = {
-    status: "done",
-    id: "4963",
-    name: "São José dos Campos",
-    uf: "SP",
-  };
-  const forecasts:WeatherForecastProps = {
-    status: "done",
-    updated: "22/05/2023",
-    forecasts: [
-      { date: "23/05/2023", max: "26", min: "14", iuv: "5.0" },
-      { date: "24/05/2023", max: "26", min: "14", iuv: "5.0" },
-      { date: "25/05/2023", max: "26", min: "15", iuv: "5.0" },
-      { date: "26/05/2023", max: "26", min: "15", iuv: "5.0" },
-    ],
-  };
+  const {city, setCity, forecasts, setForecasts}:{city:CityProps, setCity:Function, forecasts:WeatherForecastProps, setForecasts:Function} = useContexto();
+
+  const loadCity = async (name:string) => {
+    setCity({status: "loading", id: "", name: "", uf: ""});
+    const res = await listCities(name);
+    setCity(res);
+    await loadForecasts(res.id)
+  }
+
+  const loadForecasts = async (id:string) => {
+    setForecasts({status: "loading", updated: "", forecasts: []});
+    const res = await weatherForest(id);
+    setForecasts(res);
+  }
 
   return (
     <WrapperSld>
@@ -28,7 +29,7 @@ export default function Main() {
       <Input
         value={input}
         set={setInput}
-        operation={() => console.log(replace(input))}
+        operation={() => loadCity(replace(input))}
       />
       {city && <City {...city} />}
       {forecasts && <Forecast {...forecasts} />}
